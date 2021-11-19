@@ -130,8 +130,9 @@ dkms.conf
 *.l1p
 *.l2p
 *.iex
-MDK-ARM/.cmsis/*
-MDK-ARM/.eide/*
-MDK-ARM/build/*
-\MDK-ARM/build/MedicalCar/.hex
+gulu/MDK-ARM/.cmsis/*
+gulu/MDK-ARM/.eide/*
+gulu/MDK-ARM/build/*
+gulu/MDK-ARM/JLinkLog.txt
+\course_design/MDK-ARM/build/gulu/*.hex
 
