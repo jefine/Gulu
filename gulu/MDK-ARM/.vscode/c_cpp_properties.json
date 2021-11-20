@@ -1,0 +1,35 @@
+{
+    "configurations": [
+        {
+            "name": "win32",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}\\..\\Core\\Inc",
+                "${workspaceFolder}\\..\\Drivers\\STM32F1xx_HAL_Driver\\Inc",
+                "${workspaceFolder}\\..\\Drivers\\STM32F1xx_HAL_Driver\\Inc\\Legacy",
+                "${workspaceFolder}\\..\\Drivers\\CMSIS\\Device\\ST\\STM32F1xx\\Include",
+                "${workspaceFolder}\\..\\Drivers\\CMSIS\\Include",
+                "${workspaceFolder}\\.cmsis\\include",
+                "${workspaceFolder}\\RTE\\_gulu",
+                "${workspaceFolder}\\.eide\\deps",
+                "E:\\mdkArmkeil5\\ARM\\ARMCC\\include",
+                "E:\\mdkArmkeil5\\ARM\\ARMCC\\include\\rw"
+            ],
+            "defines": [
+                "${default}",
+                "__VSCODE_CPPTOOL",
+                "USE_HAL_DRIVER",
+                "STM32F103xE"
+            ],
+            "intelliSenseMode": "${default}",
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "${default}"
+            },
+            "forcedInclude": [
+                "c:\\Users\\fanfanfan\\.vscode\\extensions\\cl.eide-2.14.0\\bin\\include\\internal_headers\\armcc_intr.h"
+            ]
+        }
+    ],
+    "version": 4
+}
