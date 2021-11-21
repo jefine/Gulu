@@ -58,6 +58,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define PHOTO_Pin GPIO_PIN_1
+#define PHOTO_GPIO_Port GPIOB
 #define DHT_Pin GPIO_PIN_2
 #define DHT_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

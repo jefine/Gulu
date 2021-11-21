@@ -85,7 +85,7 @@ void DHT_Start (void)
 {
 	DWT_Delay_Init();
 	Set_Pin_Output (DHT_PORT, DHT_PIN);  // set the pin as output
-	HAL_GPIO_WritePin (DHT_PORT, DHT_PIN, 0);   // pull the pin low
+	HAL_GPIO_WritePin (DHT_PORT, DHT_PIN, GPIO_PIN_RESET);   // pull the pin low
 
 #if defined(TYPE_DHT11)
 	delay (18000);   // wait for 18ms
@@ -95,7 +95,7 @@ void DHT_Start (void)
 	delay (1200);  // >1ms delay
 #endif
 
-    HAL_GPIO_WritePin (DHT_PORT, DHT_PIN, 1);   // pull the pin high
+    HAL_GPIO_WritePin (DHT_PORT, DHT_PIN, GPIO_PIN_SET);   // pull the pin high
     delay (20);   // wait for 30us
 	Set_Pin_Input(DHT_PORT, DHT_PIN);    // set as input
 }
