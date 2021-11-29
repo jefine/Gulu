@@ -108,10 +108,8 @@ int main(void)
     Humidity = (int)DHT11_Data.Humidity;
     // printf("Temperature is: %d\n", Temperature);
     // printf("Humidity is: %d\n", Humidity);
-    // //1->Dark,0->Bright
-    // printf("Photo sensor is : %d\n",HAL_GPIO_ReadPin(PHOTO_GPIO_Port,PHOTO_Pin));
     // HAL_Delay(2000);
-    
+
   }
   /* USER CODE END 3 */
 }
@@ -141,8 +139,7 @@ void SystemClock_Config(void)
   }
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -173,7 +170,7 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

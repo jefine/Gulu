@@ -9,8 +9,7 @@
                 "${workspaceFolder}\\..\\Drivers\\STM32F1xx_HAL_Driver\\Inc\\Legacy",
                 "${workspaceFolder}\\..\\Drivers\\CMSIS\\Device\\ST\\STM32F1xx\\Include",
                 "${workspaceFolder}\\..\\Drivers\\CMSIS\\Include",
-                "${workspaceFolder}\\.cmsis\\include",
-                "${workspaceFolder}\\RTE\\_gulu",
+                "${workspaceFolder}\\RTE\\_Gulu",
                 "${workspaceFolder}\\.eide\\deps",
                 "E:\\mdkArmkeil5\\ARM\\ARMCC\\include",
                 "E:\\mdkArmkeil5\\ARM\\ARMCC\\include\\rw"

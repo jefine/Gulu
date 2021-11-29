@@ -8,7 +8,7 @@
             "name": "jlink",
             "servertype": "jlink",
             "interface": "swd",
-            "executable": ".\\build\\gulu\\MDK-ARM.elf",
+            "executable": ".\\build\\Gulu\\MDK-ARM.elf",
             "runToMain": true,
             "device": "STM32F103RC"
         }
