@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "DHT.h"
 #include "stdio.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,6 +49,11 @@
 /* USER CODE BEGIN PV */
 DHT_DataTypedef DHT11_Data;
 int Temperature, Humidity;
+
+uint8_t RxBuff[1];      //interrupt data buffer
+uint8_t DataBuff[5000]; //data receved 
+int RxLength=0;         //length of receved data
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,6 +98,7 @@ int main(void)
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_USART1_UART_Init();
+  HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //打开串口中断接收
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -139,7 +146,8 @@ void SystemClock_Config(void)
   }
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -152,7 +160,23 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef*UartHandle)
+{
+    RxLength++;                      
+    DataBuff[RxLength-1]=RxBuff[0];  
+    
+    if(RxBuff[0]==0x0D)            //end
+    {
+        printf("RXLen=%d\r\n",RxLength); 
+        for(int i=0;i<RxLength;i++)
+          printf("UART DataBuff[%d] = 0x%x\r\n",i,DataBuff[i]);                            
+        memset(DataBuff,0,sizeof(DataBuff));  
+        RxLength=0; 
+    }
+    
+    RxBuff[0]=0;
+    HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //每接收一个数据，就打开一次串口中断接收，否则只会接收一个数据就停止接收
+}
 /* USER CODE END 4 */
 
 /**
@@ -170,7 +194,7 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
+#ifdef  USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.
