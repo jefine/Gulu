@@ -5,16 +5,34 @@
 #include "../lib/ArduinoJson/ArduinoJson.h"
 #include "net.h"
 #include "secrets.h"
+#include "cube.h"
 
-
-const char* mqtt_server = "jefine.ga";
+const char* mqtt_server = MQTTBROKER;
 WiFiClient espClient;
 PubSubClient client(espClient);
-// JOSN是一种轻量级的数据交换格式，遵循一下规则：
-// 1.并列的数据之间用逗号(,)分隔
-// 2.映射用冒号(:)表示
-// 3.并列数据的集合(数组)用方括号([])表示
-// 4.映射的集合(对象)用大括号({})表示
+
+enum DemoStatus status;
+
+
+String current_cityname ="";
+String current_cityid = "";
+String current_time ="";
+String current_humidity = "";
+String current_weather = "";
+String current_airindex = "";
+
+// some useful UrlAPI 
+
+//return location lon lat,ip and city name
+String iplocationUrl = "http://ip-api.com/json/";
+
+//return time by ip with ip's utc
+String timeUrl = "http://worldtimeapi.org/api/ip";
+
+//limitied, if errcode==100,change appid and it's appsecret;
+String weatherUrl = "https://tianqiapi.com/api?unescape=1&version=v6";
+
+DynamicJsonDocument doc(1024);
 
 void setup()
 {
@@ -33,21 +51,17 @@ void setup()
 	Serial.println("IP address: ");
 	Serial.println(WiFi.localIP());
 	client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+    client.setCallback(callback);
+	client.publish("Gulu/ESP","ESP has connectted mqtt");
+	status = Time;// init status
+	
+	//test
+	//StartColourfulEgg();
 }
 
 
 
-String current_cityname ="";
-String current_cityid = "";
-String current_time ="";
-// some useful UrlAPI 
-String iplocationUrl = "http://ip-api.com/json/";
-String timeUrl = "http://worldtimeapi.org/api/ip";
-String weatherUrl = "https://devapi.qweather.com/v7/weather/now?";
-String lookupcityidUrl = "https://geoapi.qweather.com/v2/city/lookup?";
 
-DynamicJsonDocument doc(1024);
 //update current_time
 void GetCurrentTime()
 {
@@ -84,11 +98,11 @@ void GetCurrentTime()
 	http.end();
 }
 
-//update current_cityname,then update current_cityid
-void GetCurrentLocation()
+void GetCurrentWeather()
 {
-	HTTPClient http;
-	http.begin(iplocationUrl); 
+  	HTTPClient http;
+	http.begin(weatherUrl+"&appid="+BCKWEATHERPI_APPID+"&appsecret="+BCKWEATHERPI_APPSECRET); //HTTP begin
+	Serial.println(weatherUrl+"&appid="+BCKWEATHERPI_APPID+"&appsecret="+BCKWEATHERPI_APPSECRET);
 	int httpCode = http.GET();
 
 	if (httpCode > 0)
@@ -105,92 +119,23 @@ void GetCurrentLocation()
 			deserializeJson(doc, resBuff); //开始使用Json解析
 
 			String cityname = doc["city"];
+			current_cityname = cityname;
+			String cityid = doc["cityid"];
+			current_cityid = cityid;
+			String weather = doc["tem"];
+			current_weather = weather;
+			String humidity = doc["humidity"];
+			current_humidity = humidity;
+			String airindex = doc["air"];
+			current_airindex = airindex;
+
 			char buf[50]="";
-      current_cityname = cityname;
-			current_cityname.toCharArray(buf,sizeof(buf),0);
-			Serial.print("current_cityname is: ");
-			Serial.println(current_cityname);
+			resBuff.toCharArray(buf,sizeof(buf),0);
 			client.publish("Gulu/ESP32", buf);
-		}
-	}
-	else
-	{
-		Serial.printf("HTTP Get Error: %s\n", http.errorToString(httpCode).c_str());
-	}
-
-	http.end();
-  
-}
-void GetCurrentCityid()
-{
-  HTTPClient http;
-  //Then get the City's ID(for weather request)
-	http.begin(lookupcityidUrl+"location="+current_cityname+"&key="+WEATHERKEY+"&number=1&Gzip=n");
-  Serial.println(lookupcityidUrl+"location="+current_cityname+"&key="+WEATHERKEY+"&number=1&Gzip=n"); 
-	int httpCode = http.GET();
-
-	if (httpCode > 0)
-	{
-		// httpCode will be negative on error
-		Serial.printf("lookupcityidUrl:HTTP Get Code: %d\r\n", httpCode);
-
-		if (httpCode == HTTP_CODE_OK) 
-		{
-			String resBuff = http.getString();
-
-			Serial.println(resBuff);
-			
-			deserializeJson(doc, resBuff); //开始使用Json解析
-
-			String id = doc["location"]["0"]["id"];
-			char buf[50]="";
-      current_cityid = id;
-			current_cityid.toCharArray(buf,sizeof(buf),0);
-			Serial.print("current_cityid is: ");
-			Serial.println(current_cityid);
-			client.publish("Gulu/ESP32", buf);
-		}
-	}
-	else
-	{
-		Serial.printf("HTTP Get Error: %s\n", http.errorToString(httpCode).c_str());
-	}
-
-	http.end();
-
-}
-//todo
-void GetWeather()
-{
-  HTTPClient http;
-	http.begin(weatherUrl); //HTTP begin
-	int httpCode = http.GET();
-
-	if (httpCode > 0)
-	{
-		// httpCode will be negative on error
-		Serial.printf("HTTP Get Code: %d\r\n", httpCode);
-
-		if (httpCode == HTTP_CODE_OK) 
-		{
-			String resBuff = http.getString();
-
-			Serial.println(resBuff);
-			
-
-			deserializeJson(doc, resBuff); //开始使用Json解析
-
-			String addr = doc["data"]["addr"];
-			char buf[50]="";
-			addr.toCharArray(buf,sizeof(buf),0);
-			Serial.print("send is: ");
-			for(auto c : buf)
-			{
-				Serial.print(c);
-			}
-			Serial.println();
-			client.publish("Gulu/ESP32", buf);
-			client.publish("Gulu/ESP32", "测试中文");
+			char buff[50]= "";
+			(current_cityname+" "+current_weather+" "+current_humidity).toCharArray(buff,sizeof(buff),0);
+      		client.publish("Gulu/ESP32", buff);
+      
 		}
 	}
 	else
@@ -208,8 +153,57 @@ void loop()
 		reconnect();
 	}
 	client.loop();
-	GetCurrentTime();
-  GetCurrentLocation();
-  GetCurrentCityid();
-	delay(10000);
+
+	// GetCurrentTime();
+ 	// GetWeather();
+	//
+	unsigned int num = 0;
+	if(num%1000==0)num = 0;
+	
+	if(Serial.available())
+	{
+		int c = Serial.read();
+		if(c==17){
+			client.publish("Gulu/ESP32", "Serial receved 11 \n status change to Colourful_Egg\n");
+			status = Colourful_Egg;
+			num = 0;
+		}
+		if(c==18){
+			client.publish("Gulu/ESP32", "Serial receved 12 \n status change to Weather_Humidity\n");
+			status = Weather_Humidity;
+			num = 0;
+		}
+		if(c==19){
+			client.publish("Gulu/ESP32", "Serial receved 13 \n status change to Time\n");
+			status = Time;
+			num = 0;
+		}
+		client.publish("Gulu/ESP32Serial", "Serial receved \n");
+		
+		
+	}
+	delay(10);
+	switch (status)
+	{
+	case Colourful_Egg:
+		if(num++==0)
+			StartColourfulEgg();
+		break;
+	case Weather_Humidity:
+		if(num++==0)
+		{
+			GetCurrentWeather();
+			Serial.println(current_weather);
+		}
+		break;
+	case Time:
+		if(num++==0)
+		{
+			GetCurrentTime();
+		 	Serial.println(current_time);
+		}
+		break;
+	default:
+		break;
+	}
 }

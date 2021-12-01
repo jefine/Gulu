@@ -1,10 +1,13 @@
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <PubSubClient.h>
 #include "../lib/ArduinoJson/ArduinoJson.h"
 #include "net.h"
-
+#include "cube.h"
+ 
+extern enum DemoStatus status;
 extern WiFiClient espClient;
 extern PubSubClient client;
 
@@ -22,15 +25,28 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.print(topic);
   Serial.print(". Message: ");
   String messageTemp;
-  
   for (int i = 0; i < length; i++) {
     Serial.print((char)message[i]);
     messageTemp += (char)message[i];
   }
   Serial.println();
+  char buf[50]="";
+  messageTemp.toCharArray(buf,sizeof(buf),0);
+  client.publish("Gulu/ESP32", "ESP receved :");
+  client.publish("Gulu/ESP32", buf);
 
-  // Feel free to add more if statements to control more GPIOs with MQTT
-
+  if(messageTemp.equals("Colourful_Egg")){
+    client.publish("Gulu/ESP32", "MQTT receved Colourful_Egg \n status change to Colourful_Egg\n");
+    status = Colourful_Egg;
+  }
+  if(messageTemp.equals("Weather_Humidity")){
+    client.publish("Gulu/ESP32", "MQTT receved Weather_Humidity \n status change to Weather_Humidity\n");
+    status = Weather_Humidity;
+  }if(messageTemp.equals("Time")){
+    client.publish("Gulu/ESP32", "MQTT receved Time \n status change to Time\n");
+    status = Time;
+  }
+  
   // If a message is received on the topic esp32/output, you check if the message is either "on" or "off". 
   // Changes the output state according to the message
 //   if (String(topic) == "esp32/output") {
