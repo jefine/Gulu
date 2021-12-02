@@ -38,6 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -48,11 +49,21 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+enum DemoStatus
+{
+    Colourful_Egg,Weather_Humidity,Time
+};
+enum DemoStatus status;
+
+
 DHT_DataTypedef DHT11_Data;
-int Temperature, Humidity;
+
+int Temperature, Humidity, WebTemperature;
+int HH,MM;
+
 
 uint8_t RxBuff[1];      //interrupt data buffer
-uint8_t DataBuff[5000]; //data receved 
+uint8_t DataBuff[500]; //data receved 
 int RxLength=0;         //length of receved data
 
 /* USER CODE END PV */
@@ -99,9 +110,9 @@ int main(void)
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_USART1_UART_Init();
-  HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //打开串口中断接收
+  
   /* USER CODE BEGIN 2 */
-
+  HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //打开串口中断接收
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -109,15 +120,40 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+    switch (status)
+    {
+    case Colourful_Egg:
+      if(num++==0)
+        unsigned char buf[] = {0X11};
+        printf("%c", buf[0]);
 
+      break;
+    case Weather_Humidity:
+      if(num++==0)
+      {
+        //tell esp
+        
+        DHT_GetData(&DHT11_Data); // No decimal part,so turn to int
+        Temperature = (int)DHT11_Data.Temperature;
+        Humidity = (int)DHT11_Data.Humidity;
+        // printf("Temperature is: %d\n", Temperature);
+        // printf("Humidity is: %d\n", Humidity);
+        
+      }
+      break;
+    case Time:
+      if(num++==0)
+      {
+        unsigned char buf[] = {0X13};
+        printf("%c", buf[0]);
+      }
+      break;
+    default:
+      break;
+    }
     /* USER CODE BEGIN 3 */
-    DHT_GetData(&DHT11_Data); // No decimal part,so turn to int
-    Temperature = (int)DHT11_Data.Temperature;
-    Humidity = (int)DHT11_Data.Humidity;
-    // printf("Temperature is: %d\n", Temperature);
-    // printf("Humidity is: %d\n", Humidity);
-    HAL_Delay(1000);
-    _uart_Weather(Temperature,Humidity);
+    
+    
   }
   /* USER CODE END 3 */
 }
@@ -163,19 +199,48 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef*UartHandle)
 {
+     
+    //printf("RXLen=%d\r\n",RxLength); 
+    // for(int i=0;i<RxLength;i++)
+    // printf("UART DataBuff[%d] = 0x%x\r\n",i,DataBuff[i]);                            
+    // memset(DataBuff,0,sizeof(DataBuff));  
     RxLength++;                      
-    DataBuff[RxLength-1]=RxBuff[0];  
-    
-    if(RxBuff[0]==0x0D)            //end
+    DataBuff[RxLength-1]=RxBuff[0]; 
+
+    if(RxBuf[0]=='19'){
+       //Time
+       if(RxLength==5){
+         HH = DataBuff
+       }
+    }
+    else
     {
-        printf("RXLen=%d\r\n",RxLength); 
-        for(int i=0;i<RxLength;i++)
-          printf("UART DataBuff[%d] = 0x%x\r\n",i,DataBuff[i]);                            
-        memset(DataBuff,0,sizeof(DataBuff));  
-        RxLength=0; 
+      if(RxBuff[0]=='11')            //end
+      {
+        status = Colourful_Egg;
+        unsigned char buf[] = {0X11};
+        printf("%c", buf[0]);
+      }
+      if(RxBuff[0]=='12')            //end
+      {
+        status = Weather_Humidity;
+        unsigned char buf[] = {0X12};
+        printf("%c", buf[0]);
+      }
+      if(RxBuff[0]=='13')            //end
+      {
+        status = Time;
+        unsigned char buf[] = {0X13};
+        printf("%c", buf[0]);
+      }
+      RxLength=0; 
+      RxBuff[0]=0;
+      memset(DataBuff,0,sizeof(DataBuff)); 
     }
     
-    RxBuff[0]=0;
+
+    
+    
     HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //每接收一个数据，就打开一次串口中断接收，否则只会接收一个数据就停止接收
 }
 /* USER CODE END 4 */

@@ -13,7 +13,6 @@ const unsigned char g_uart_send_foot[] = {
 
 // 串口发送函数实现
 void _uart_send_impl(unsigned char* buff, int len) {
-  // TODO: 调用项目实际的串口发送函数
   
   int i = 0;
   unsigned char c;
