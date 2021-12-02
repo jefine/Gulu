@@ -36,7 +36,6 @@ DynamicJsonDocument doc(1024);
 
 void setup()
 {
-
 	Serial.begin(115200);
   // unsigned char t[] = {0XAA ,0X55 ,0X01 ,0X0A ,0X00 ,0X00 ,0X00 ,0X0B,0X00 ,0X00 ,0X00 ,0X55 ,0XAA};
   // //虽然ESP32每次启示发送时，会有串口乱码输出，但不影响，有校验

@@ -20,7 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
-#include "usart.h"
+#include "usart.h"  
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -28,6 +28,7 @@
 #include "DHT.h"
 #include "stdio.h"
 #include "string.h"
+#include "jx_uart_send.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -115,8 +116,8 @@ int main(void)
     Humidity = (int)DHT11_Data.Humidity;
     // printf("Temperature is: %d\n", Temperature);
     // printf("Humidity is: %d\n", Humidity);
-    // HAL_Delay(2000);
-
+    HAL_Delay(1000);
+    _uart_Weather(Temperature,Humidity);
   }
   /* USER CODE END 3 */
 }
