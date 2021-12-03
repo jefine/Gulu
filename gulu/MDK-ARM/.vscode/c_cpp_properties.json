@@ -11,6 +11,7 @@
                 "${workspaceFolder}\\..\\Drivers\\CMSIS\\Include",
                 "${workspaceFolder}\\RTE\\_Gulu",
                 "${workspaceFolder}\\.eide\\deps",
+                "${workspaceFolder}\\..\\Core\\Src",
                 "E:\\mdkArmkeil5\\ARM\\ARMCC\\include",
                 "E:\\mdkArmkeil5\\ARM\\ARMCC\\include\\rw"
             ],

@@ -132,8 +132,8 @@ void GetCurrentWeather()
 			resBuff.toCharArray(buf,sizeof(buf),0);
 			client.publish("Gulu/ESP32", buf);
 			char buff[50]= "";
-			(current_cityname+" "+current_weather+" "+current_humidity).toCharArray(buff,sizeof(buff),0);
-      		client.publish("Gulu/ESP32", buff);
+			//(current_cityname+" "+current_weather+" "+current_humidity).toCharArray(buff,sizeof(buff),0);
+      		//client.publish("Gulu/ESP32", buff);
       
 		}
 	}
@@ -156,53 +156,51 @@ void loop()
 	// GetCurrentTime();
  	// GetWeather();
 	//
-	unsigned int num = 0;
-	if(num%1000==0)num = 0;
+	//unsigned int num = 0;
 	
-	if(Serial.available())
+	if(Serial.find('$'))
 	{
-		int c = Serial.read();
-		if(c==17){
-			client.publish("Gulu/ESP32", "Serial receved 11 \n status change to Colourful_Egg\n");
+		char c = Serial.read();
+		if(c=='1'){
+			client.publish("Gulu/ESP32", "Serial receved 1 \n status change to Colourful_Egg\n");
 			status = Colourful_Egg;
-			num = 0;
-		}
-		if(c==18){
-			client.publish("Gulu/ESP32", "Serial receved 12 \n status change to Weather_Humidity\n");
-			status = Weather_Humidity;
-			num = 0;
-		}
-		if(c==19){
-			client.publish("Gulu/ESP32", "Serial receved 13 \n status change to Time\n");
-			status = Time;
-			num = 0;
-		}
-		client.publish("Gulu/ESP32Serial", "Serial receved \n");
-		
-		
-	}
-	delay(10);
-	switch (status)
-	{
-	case Colourful_Egg:
-		if(num++==0)
 			StartColourfulEgg();
-		break;
-	case Weather_Humidity:
-		if(num++==0)
-		{
+		}
+		if(c=='2'){
+			client.publish("Gulu/ESP32", "Serial receved 2 \n status change to Weather_Humidity\n");
+			status = Weather_Humidity;
 			GetCurrentWeather();
 			Serial.println(current_weather);
+			Serial.write(0X19);
 		}
-		break;
-	case Time:
-		if(num++==0)
-		{
+		if(c=='3'){
+			client.publish("Gulu/ESP32", "Serial receved 3 \n status change to Time\n");
+			status = Time;
 			GetCurrentTime();
 		 	Serial.println(current_time);
+			Serial.write(0X19);
 		}
-		break;
-	default:
-		break;
+		client.publish("Gulu/ESP32Serial", "Serial receved $ \n");
+		char a[1]="";
+		a[0]=c;
+		client.publish("Gulu/ESP32Serial", a);
 	}
+	// switch (status)
+	// {
+	// case Colourful_Egg:
+	// 		StartColourfulEgg();
+	// 	break;
+	// case Weather_Humidity:
+	// 	{
+			
+	// 	}
+	// 	break;
+	// case Time:
+	// 	{
+			
+	// 	}
+	// 	break;
+	// default:
+	// 	break;
+	// }
 }

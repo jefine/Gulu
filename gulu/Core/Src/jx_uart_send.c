@@ -91,3 +91,30 @@ void _uart_Weather(int TempLocalVal, int TempWebVal) {
   _uart_send_impl(buff, 13);
 }
 
+
+// action: Time
+void _uart_Time(int HH, int MM) {
+  uart_param_t param;
+  int i = 0;
+  unsigned char buff[UART_SEND_MAX] = {0};
+  for (i = 0; i < UART_MSG_HEAD_LEN; i++) {
+      buff[i + 0] = g_uart_send_head[i];
+  }
+  buff[2] = U_MSG_Time;
+  param.d_int = HH;
+  _int16_to_int32(&param);
+  buff[3] = param.d_ucs[0];
+  buff[4] = param.d_ucs[1];
+  buff[5] = param.d_ucs[2];
+  buff[6] = param.d_ucs[3];
+  param.d_int = MM;
+  _int16_to_int32(&param);
+  buff[7] = param.d_ucs[0];
+  buff[8] = param.d_ucs[1];
+  buff[9] = param.d_ucs[2];
+  buff[10] = param.d_ucs[3];
+  for (i = 0; i < UART_MSG_FOOT_LEN; i++) {
+      buff[i + 11] = g_uart_send_foot[i];
+  }
+  _uart_send_impl(buff, 13);
+}

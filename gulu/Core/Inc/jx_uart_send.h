@@ -11,6 +11,7 @@ extern "C" {
 #define UART_MSG_FOOT_LEN  2
 
 // 串口发送消息号
+#define U_MSG_Time      2
 #define U_MSG_Weather      1
 
 // 串口消息参数类型
@@ -30,7 +31,7 @@ void _float_to_double(uart_param_t* param);
 
 // action: Weather
 void _uart_Weather(int TempLocalVal, int TempWebVal);
-
+void _uart_Time(int HH, int MM);
 #ifdef __cplusplus
 }
 #endif

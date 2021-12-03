@@ -24,7 +24,7 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.print(topic);
   Serial.print(". Message: ");
-  String messageTemp;
+  String messageTemp="";
   for (int i = 0; i < length; i++) {
     Serial.print((char)message[i]);
     messageTemp += (char)message[i];
@@ -35,14 +35,14 @@ void callback(char* topic, byte* message, unsigned int length) {
   client.publish("Gulu/ESP32", "ESP receved :");
   client.publish("Gulu/ESP32", buf);
 
-  if(messageTemp.equals("Colourful_Egg")){
+  if(messageTemp=="Colourful_Egg"){
     client.publish("Gulu/ESP32", "MQTT receved Colourful_Egg \n status change to Colourful_Egg\n");
     status = Colourful_Egg;
   }
-  if(messageTemp.equals("Weather_Humidity")){
+  if(messageTemp=="Weather_Humidity"){
     client.publish("Gulu/ESP32", "MQTT receved Weather_Humidity \n status change to Weather_Humidity\n");
     status = Weather_Humidity;
-  }if(messageTemp.equals("Time")){
+  }if(messageTemp=="Time"){
     client.publish("Gulu/ESP32", "MQTT receved Time \n status change to Time\n");
     status = Time;
   }
