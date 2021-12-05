@@ -20,7 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
-#include "usart.h"  
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -60,14 +60,18 @@ enum DemoStatus status;
 
 DHT_DataTypedef DHT11_Data;
 
-int Temperature, Humidity, WebTemperature;
-int HH,MM;
+int Temperature=0, Humidity=0, WebTemperature=0;
+int HH=0,MM=0;
 int num=0;
 
 uint8_t RxBuff[1];      //interrupt data buffer
 uint8_t DataBuff[500]; //data receved 
 int RxLength=0;         //length of receved data
-
+uint8_t Rx2Buff[1];      //interrupt data buffer
+uint8_t Data2Buff[500]; //data receved 
+int Rx2Length=0;         //length of receved data
+int flag = 0;
+int quest = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -112,11 +116,25 @@ int main(void)
   MX_I2C1_Init();
   MX_I2C2_Init();
   MX_USART1_UART_Init();
-  
+  MX_USART2_UART_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //打开串口中断接收
+	
+  // DHT_GetData(&DHT11_Data); 
+	// Temperature = (int)DHT11_Data.Temperature;
+	
+  //HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //打开串口中断接收
+  HAL_UART_Receive_IT(&huart2, (uint8_t *)Rx2Buff, 1); // only for esp receve
+	HAL_UART_Receive_IT(&huart3, (uint8_t *)RxBuff, 1); //only for speech receve
   HAL_NVIC_SetPriority(SysTick_IRQn,0,0);
+	
   status = Time;
+	
+
+  printf("$3");
+  
+  printf("$2");
+  HAL_Delay(2000);
   OLED_Init();
 	   
 	OLED_Display_On();
@@ -124,6 +142,10 @@ int main(void)
 	OLED_Clear();
   //test
   OLED_ShowNum(2,10,99,2,16);
+	unsigned char hello[] = "hello Gulu";
+	OLED_ShowString(2,10,hello,16);
+  //Humidity = (int)DHT11_Data.Humidity;
+  //printf("STM Starting\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -143,34 +165,47 @@ int main(void)
         }
       break;
     case Weather_Humidity:
-      num = (num++)%100000;
+			//100 000
+      num = (num++)%10000;
       if(num==1)
       {
         //tell esp
+				//DHT_GetData(&DHT11_Data); // No decimal part,so turn to int
         printf("$2");
-        DHT_GetData(&DHT11_Data); // No decimal part,so turn to int
-        Temperature = (int)DHT11_Data.Temperature;
-        Humidity = (int)DHT11_Data.Humidity;
-				printf("send to esp for weather\n");
+        
+				//printf("send to esp for weather\n");
+				//_uart_Weather(Temperature,WebTemperature);
         // printf("Temperature is: %d\n", Temperature);
         // printf("Humidity is: %d\n", Humidity);
       }
       break;
     case Time:
     //should be 10000
-    num = (num++)%1000;
+    num = (num++)%10000;
       if(num==1)
       {
         printf("$3");
-				printf("send to esp for time\n");
+				//just for test!!!,it's ok to send hex
+				//_uart_Time(HH,MM);
+				//printf("send to esp for time\n");
       }
       break;
     default:
       break;
     }
+		
+    if(quest==12){
+      _uart_Weather(Temperature,WebTemperature);
+      quest=0;
+    }
+    if(quest==13){
+			_uart_Time(HH,MM);
+      quest=0;
+    }
+
     HAL_Delay(1);
     /* USER CODE END WHILE */
-    
+
     /* USER CODE BEGIN 3 */
     
     
@@ -219,64 +254,86 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef*UartHandle)
 {
-     
-    //printf("RXLen=%d\r\n",RxLength); 
-    // for(int i=0;i<RxLength;i++)
-    // printf("UART DataBuff[%d] = 0x%x\r\n",i,DataBuff[i]);                            
-    // memset(DataBuff,0,sizeof(DataBuff));  
-    RxLength++;                      
-    DataBuff[RxLength-1]=RxBuff[0]; 
-    int i;
-    //When receved message(weather or time) from esp,then update
-    //when ask for message, we will tell esp,then esp quest the web and return.
-    if(RxBuff[0]=='19'){
-      printf("RxLength==%d\n",RxLength);
-       //Time
-       if(RxLength==5){
-          HH = DataBuff[0]-'0';
-          HH += DataBuff[1]-'0';
-          MM = DataBuff[3]-'0';
-          MM += DataBuff[4]-'0';
-          printf("receved esp Time %d:%d\n",HH,MM);
-          UpdateOledTime(HH,MM);
-       }
-       //weather
-       if(RxLength==2){
-          WebTemperature = DataBuff[0]-'0';
-          WebTemperature += DataBuff[1]-'0';
-          printf("receved esp Temperature %d\n",WebTemperature);
-          UpdateOledWeather(Temperature,WebTemperature);
-       }
-    }
-    else
+    if(UartHandle->Instance == USART3)
     {
-      if(RxBuff[0]=='11')            //end
+      //printf("RXLen=%d\r\n",RxLength); 
+      // for(int i=0;i<RxLength;i++)
+      // printf("UART DataBuff[%d] = 0x%x\r\n",i,DataBuff[i]);                            
+      // memset(DataBuff,0,sizeof(DataBuff));  
+      RxLength++; 
+      DataBuff[RxLength-1]=RxBuff[0];
+      //When receved message(weather or time) from esp,then update
+      //when ask for message, we will tell esp,then esp quest the web and return.
+      if(RxBuff[0]==0X11)            //end
       {
         status = Colourful_Egg;
-        unsigned char buf[] = {0X11};
-        printf("%c", buf[0]);
+        num=0;
+        printf("$1");
       }
-      if(RxBuff[0]=='12')            //end
+      if(RxBuff[0]==0X12)            //end
       {
+        quest=12;
         status = Weather_Humidity;
-        unsigned char buf[] = {0X12};
-        printf("%c", buf[0]);
+        num=0;
+        printf("$2");
       }
-      if(RxBuff[0]=='13')            //end
+      if(RxBuff[0]==0X13)            //end
       {
+        quest=13;
         status = Time;
-        unsigned char buf[] = {0X13};
-        printf("%c", buf[0]);
+        num=0;
+        printf("$3");
       }
-      RxLength=0; 
-      RxBuff[0]=0;
-      memset(DataBuff,0,sizeof(DataBuff)); 
+      
+      HAL_UART_Receive_IT(&huart3, (uint8_t *)RxBuff, 1); //每接收一个数据，就打�??1次串口中断接收，否则只会接收1个数据就停止接收
     }
-    
 
-    
-    
-    HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //每接收一个数据，就打开一次串口中断接收，否则只会接收一个数据就停止接收
+    if(UartHandle->Instance == USART2)
+    {
+      Rx2Length++; 
+      Data2Buff[Rx2Length-1]=Rx2Buff[0];
+      if(Data2Buff[0]=='$')
+      {
+        flag = 1;
+				//Rx2Length=1;
+      }
+      if(Rx2Buff[0]=='&')
+      {
+        flag = 0;
+        //printf("RxLength==%d\n",RxLength);
+        //Time
+        if(Data2Buff[Rx2Length-4]==':'){
+          
+            HH = Data2Buff[Rx2Length-6]-'0';
+            HH *=10;
+            HH += Data2Buff[Rx2Length-5]-'0';
+            MM = Data2Buff[Rx2Length-3]-'0';
+            MM*=10;
+            MM += Data2Buff[Rx2Length-2]-'0';
+            //printf("receved esp Time %d:%d\n",HH,MM);
+            UpdateOledTime(HH,MM);
+        }
+        //weather
+        if(Data2Buff[Rx2Length-4]=='$'){
+            WebTemperature = Data2Buff[Rx2Length-3]-'0';
+            WebTemperature *=10;
+            WebTemperature += Data2Buff[Rx2Length-2]-'0';
+            printf("receved esp Temperature %d\n",WebTemperature);
+            UpdateOledWeather(Temperature,WebTemperature);
+        }
+//          Rx2Length=0; 
+//          Rx2Buff[0]=0;
+//          memset(Data2Buff,0,sizeof(Data2Buff));
+      }
+      if(flag==0)
+      {
+        Rx2Length=0; 
+        Rx2Buff[0]=0;
+        memset(Data2Buff,0,sizeof(Data2Buff));
+      }
+      HAL_UART_Receive_IT(&huart2, (uint8_t *)Rx2Buff, 1);
+    }
+     
 }
 /* USER CODE END 4 */
 
