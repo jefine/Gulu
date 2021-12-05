@@ -123,7 +123,7 @@ int main(void)
   // DHT_GetData(&DHT11_Data); 
 	// Temperature = (int)DHT11_Data.Temperature;
 	
-  //HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //打开串口中断接收
+  HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //打开串口中断接收
   HAL_UART_Receive_IT(&huart2, (uint8_t *)Rx2Buff, 1); // only for esp receve
 	HAL_UART_Receive_IT(&huart3, (uint8_t *)RxBuff, 1); //only for speech receve
   HAL_NVIC_SetPriority(SysTick_IRQn,0,0);
@@ -285,7 +285,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef*UartHandle)
         printf("$3");
       }
       
-      HAL_UART_Receive_IT(&huart3, (uint8_t *)RxBuff, 1); //每接收一个数据，就打�??1次串口中断接收，否则只会接收1个数据就停止接收
+      HAL_UART_Receive_IT(&huart3, (uint8_t *)RxBuff, 1); //每接收一个数据，就打�???1次串口中断接收，否则只会接收1个数据就停止接收
     }
 
     if(UartHandle->Instance == USART2)
