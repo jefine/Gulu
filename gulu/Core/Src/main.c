@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "DHT.h"
+#include "dht11.h"
 #include "stdio.h"
 #include "string.h"
 #include "jx_uart_send.h"
@@ -60,7 +60,7 @@ enum DemoStatus status;
 
 DHT_DataTypedef DHT11_Data;
 
-int Temperature=0, Humidity=0, WebTemperature=0;
+int Temperature=16, Humidity=0, WebTemperature=0;
 int HH=0,MM=0;
 int num=0;
 
@@ -119,14 +119,14 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-	
-  // DHT_GetData(&DHT11_Data); 
-	// Temperature = (int)DHT11_Data.Temperature;
+	HAL_NVIC_SetPriority(SysTick_IRQn,0,0);
+  DHT_GetData(&DHT11_Data); 
+	Temperature = (int)DHT11_Data.Temperature;
 	
   HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //打开串口中断接收
   HAL_UART_Receive_IT(&huart2, (uint8_t *)Rx2Buff, 1); // only for esp receve
 	HAL_UART_Receive_IT(&huart3, (uint8_t *)RxBuff, 1); //only for speech receve
-  HAL_NVIC_SetPriority(SysTick_IRQn,0,0);
+  
 	
   status = Time;
 	
@@ -134,7 +134,7 @@ int main(void)
   printf("$3");
   
   printf("$2");
-  HAL_Delay(2000);
+  HAL_Delay(3000);
   OLED_Init();
 	   
 	OLED_Display_On();
