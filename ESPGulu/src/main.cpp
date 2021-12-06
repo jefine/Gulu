@@ -36,35 +36,6 @@ String timeUrl = "http://worldtimeapi.org/api/ip";
 String weatherUrl = "https://tianqiapi.com/api?unescape=1&version=v6";
 
 DynamicJsonDocument doc(1024);
-
-void setup()
-{
-	Serial.begin(115200);
-	MySerial_stm32.begin(115200);
-  // unsigned char t[] = {0XAA ,0X55 ,0X01 ,0X0A ,0X00 ,0X00 ,0X00 ,0X0B,0X00 ,0X00 ,0X00 ,0X55 ,0XAA};
-  // //虽然ESP32每次启示发送时，会有串口乱码输出，但不影响，有校验
-  // Serial.write(t,13);
-
-	Serial.print("Connecting.. ");
-
-	WiFi_Connect();
-
-	Serial.println("WiFi connected");
-
-	Serial.println("IP address: ");
-	Serial.println(WiFi.localIP());
-	client.setServer(mqtt_server, 1883);
-    client.setCallback(callback);
-	client.publish("Gulu/ESP","ESP has connectted mqtt");
-	status = Time;// init status
-	
-	//test
-	//StartColourfulEgg();
-}
-
-
-
-
 //update current_time
 void GetCurrentTime()
 {
@@ -167,6 +138,37 @@ void GetCurrentWeather()
 }
 
 
+void setup()
+{
+	Serial.begin(115200);
+	MySerial_stm32.begin(115200);
+  // unsigned char t[] = {0XAA ,0X55 ,0X01 ,0X0A ,0X00 ,0X00 ,0X00 ,0X0B,0X00 ,0X00 ,0X00 ,0X55 ,0XAA};
+  // //虽然ESP32每次启示发送时，会有串口乱码输出，但不影响，有校验
+  // Serial.write(t,13);
+
+	Serial.print("Connecting.. ");
+
+	WiFi_Connect();
+
+	Serial.println("WiFi connected");
+
+	Serial.println("IP address: ");
+	Serial.println(WiFi.localIP());
+	client.setServer(mqtt_server, 1883);
+    client.setCallback(callback);
+	client.publish("Gulu/ESP","ESP has connectted mqtt");
+	status = Time;// init status
+	
+	//test
+	//StartColourfulEgg();
+	GetCurrentTime();
+	GetCurrentWeather();
+}
+
+
+
+
+
 void loop()
 {
 	if (!client.connected()) {
@@ -191,9 +193,6 @@ void loop()
 			client.publish("Gulu/ESP32", "Serial receved 2 \n status change to Weather_Humidity\n");
 			status = Weather_Humidity;
 			GetCurrentWeather();
-			MySerial_stm32.print("$");
-			MySerial_stm32.print(current_weather);
-			MySerial_stm32.print("&");
 		}
 		if(c==3){
 			client.publish("Gulu/ESP32", "Serial receved 3 \n status change to Time\n");

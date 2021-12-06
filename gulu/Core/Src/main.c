@@ -25,12 +25,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "dht11.h"
+#include "DHT.h"
 #include "stdio.h"
 #include "string.h"
 #include "jx_uart_send.h"
 #include "oled.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -120,9 +119,8 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 	HAL_NVIC_SetPriority(SysTick_IRQn,0,0);
-  DHT_GetData(&DHT11_Data); 
-	Temperature = (int)DHT11_Data.Temperature;
-	
+  // DHT_GetData(&DHT11_Data); 
+	// Temperature = (int)DHT11_Data.Temperature;
   HAL_UART_Receive_IT(&huart1, (uint8_t *)RxBuff, 1); //打开串口中断接收
   HAL_UART_Receive_IT(&huart2, (uint8_t *)Rx2Buff, 1); // only for esp receve
 	HAL_UART_Receive_IT(&huart3, (uint8_t *)RxBuff, 1); //only for speech receve
@@ -130,20 +128,15 @@ int main(void)
 	
   status = Time;
 	
-
-  printf("$3");
-  
-  printf("$2");
-  HAL_Delay(3000);
   OLED_Init();
 	   
 	OLED_Display_On();
 
 	OLED_Clear();
   //test
-  OLED_ShowNum(2,10,99,2,16);
+  //OLED_ShowNum(2,10,99,2,16);
 	unsigned char hello[] = "hello Gulu";
-	OLED_ShowString(2,10,hello,16);
+	OLED_ShowString(20,10,hello,16);
   //Humidity = (int)DHT11_Data.Humidity;
   //printf("STM Starting\n");
   /* USER CODE END 2 */
@@ -285,7 +278,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef*UartHandle)
         printf("$3");
       }
       
-      HAL_UART_Receive_IT(&huart3, (uint8_t *)RxBuff, 1); //每接收一个数据，就打�???1次串口中断接收，否则只会接收1个数据就停止接收
+      HAL_UART_Receive_IT(&huart3, (uint8_t *)RxBuff, 1); //每接收一个数据，就打开1次串口中断接收，否则只会接收1个数据就停止接收
     }
 
     if(UartHandle->Instance == USART2)

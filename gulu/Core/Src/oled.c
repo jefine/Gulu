@@ -181,14 +181,16 @@ void OLED_ShowCHinese(uint8_t x,uint8_t y,uint8_t no)
 void UpdateOledTime(uint8_t HH,uint8_t MM)
 {
 	OLED_Clear();
-	OLED_ShowNum(2,10,HH,2,16);
-	OLED_ShowChar(2,12,'%',16);
-	OLED_ShowNum(2,13,MM,2,16);
+	OLED_ShowNum(30,10,HH,2,16);
+	OLED_ShowChar(53,10,':',16);
+	OLED_ShowNum(70,10,MM,2,16);
 }
 
 void UpdateOledWeather(uint8_t weather,uint8_t webweather)
 {
 	OLED_Clear();
-	OLED_ShowNum(2,10,weather,2,16);
-	OLED_ShowNum(2,16,webweather,2,16);
+	OLED_ShowNum(15,10,weather,2,16);
+	OLED_ShowChar(33,10,'C',16);
+	OLED_ShowNum(63,10,webweather,2,16);
+	OLED_ShowChar(80,10,'C',16);
 }

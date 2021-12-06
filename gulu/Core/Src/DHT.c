@@ -7,8 +7,8 @@
 //#define TYPE_DHT22
 
 
-#define DHT_PORT DHT_GPIO_Port 
-#define DHT_PIN  DHT_Pin
+#define DHT_PORT DHT11_GPIO_Port 
+#define DHT_PIN  DHT11_Pin
 
 
 
