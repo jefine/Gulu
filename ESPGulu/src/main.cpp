@@ -6,8 +6,14 @@
 #include "net.h"
 #include "secrets.h"
 #include "cube.h"
-#include <HardwareSerial.h>    
+#include <HardwareSerial.h>  
+#include <DHT.h>  
 
+/*
+	Some api key or id need config by yourself.
+	In this project it has been hiden.
+	But they are all easy to apply and free to use.
+*/
 const char* mqtt_server = MQTTBROKER;
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -15,15 +21,16 @@ PubSubClient client(espClient);
 HardwareSerial MySerial_stm32(2); 
 
 enum DemoStatus status;
-
-
+#define DHTTYPE DHT11 
+#define DHTPin  13
+DHT dht(DHTPin, DHTTYPE);   
 String current_cityname ="";
 String current_cityid = "";
 String current_time ="";
 String current_humidity = "";
 String current_weather = "";
 String current_airindex = "";
-
+int localTemp=19;
 // some useful UrlAPI 
 
 //return location lon lat,ip and city name
@@ -108,7 +115,15 @@ void GetCurrentWeather()
 			current_humidity = humidity;
 			String airindex = doc["air"];
 			current_airindex = airindex;
-
+			float t = 0;
+			t = dht.readTemperature();
+			if(t!=NAN)
+			{
+				localTemp = (int)t;
+				client.publish("Gulu/ESP32", "get the dht temperature");
+			}
+			else
+			{client.publish("Gulu/ESP32", "error to get the local temp");}
 			char buf[100]="";
 			resBuff.toCharArray(buf,sizeof(buf),0);
 			client.publish("Gulu/ESP32", buf);
@@ -116,17 +131,24 @@ void GetCurrentWeather()
 			Serial.print("$");
 			if(temp<10)Serial.print("0");
 		 	Serial.print(current_weather);
+			Serial.print(localTemp);
 			Serial.print("&");
 			MySerial_stm32.print("$");
 			if(temp<10)MySerial_stm32.print("0");
 			MySerial_stm32.print(current_weather);
+			if(localTemp<10)MySerial_stm32.print("0");
+			MySerial_stm32.print(localTemp);
 			MySerial_stm32.print("&");
 			
 			char buff[50]= "";
 			current_weather.toCharArray(buff,sizeof(buff),0);
+			
 			client.publish("Gulu/ESP32", buff);
 			//(current_cityname+" "+current_weather+" "+current_humidity).toCharArray(buff,sizeof(buff),0);
-      		
+      		char bufff[10]="";
+			itoa(localTemp, bufff, 10);
+			client.publish("Gulu/ESP32", bufff);
+			delay(1000);
 		}
 	}
 	else
@@ -142,6 +164,8 @@ void setup()
 {
 	Serial.begin(115200);
 	MySerial_stm32.begin(115200);
+	
+	dht.begin();
   // unsigned char t[] = {0XAA ,0X55 ,0X01 ,0X0A ,0X00 ,0X00 ,0X00 ,0X0B,0X00 ,0X00 ,0X00 ,0X55 ,0XAA};
   // //虽然ESP32每次启示发送时，会有串口乱码输出，但不影响，有校验
   // Serial.write(t,13);
