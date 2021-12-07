@@ -137,7 +137,6 @@ int main(void)
   //OLED_ShowNum(2,10,99,2,16);
 	unsigned char hello[] = "hello Gulu";
 	OLED_ShowString(20,10,hello,16);
-  //Humidity = (int)DHT11_Data.Humidity;
   //printf("STM Starting\n");
   /* USER CODE END 2 */
 
@@ -147,7 +146,6 @@ int main(void)
   
   while (1)
   {
-    unsigned char buf[1];
     switch (status)
     {
     case Colourful_Egg:
@@ -307,10 +305,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef*UartHandle)
             UpdateOledTime(HH,MM);
         }
         //weather
-        if(Data2Buff[Rx2Length-4]=='$'){
-            WebTemperature = Data2Buff[Rx2Length-3]-'0';
+        if(Data2Buff[Rx2Length-6]=='$'){
+            WebTemperature = Data2Buff[Rx2Length-5]-'0';
             WebTemperature *=10;
-            WebTemperature += Data2Buff[Rx2Length-2]-'0';
+            WebTemperature += Data2Buff[Rx2Length-4]-'0';
+            Temperature = Data2Buff[Rx2Length-3]-'0';
+            Temperature *=10;
+            Temperature += Data2Buff[Rx2Length-2]-'0';
             printf("receved esp Temperature %d\n",WebTemperature);
             UpdateOledWeather(Temperature,WebTemperature);
         }
