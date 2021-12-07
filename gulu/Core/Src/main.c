@@ -57,7 +57,7 @@ enum DemoStatus
 enum DemoStatus status;
 
 
-DHT_DataTypedef DHT11_Data;
+// DHT_DataTypedef DHT11_Data;
 
 int Temperature=16, Humidity=0, WebTemperature=0;
 int HH=0,MM=0;
