@@ -191,8 +191,6 @@ void setup()
 
 
 
-
-
 void loop()
 {
 	if (!client.connected()) {
