@@ -1,6 +1,8 @@
 # Gulu
 Hello, This is a STM32 Project for the beginner who want to connect the STM32 to the web using by ESP32 to build a mini voice assistant.
 
+![realimg](pictures/real.png)
+
 In this simple project, I have used these parts:
 * STM32 RCT6 Dev board
 * ESP32 NodeMCU
